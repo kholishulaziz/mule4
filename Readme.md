@@ -1,4 +1,4 @@
-##Mule training & exercise from MuleSoft.U Developer Essentials##
+## Mule training & exercise from MuleSoft.U Developer Essentials ##
 improve and upgrade mule runtime from [previous project](https://github.com/kholishulaziz/mule)
 
 **Required:**
@@ -25,5 +25,5 @@ http://localhost:8081/american?code=SFO
 http://localhost:8081/flights
 ```
 
-######Demo:######
+###### Demo: ######
 http://aziz-mule4.us-e2.cloudhub.io/flights
