@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<global-property doc:name="Global Property" doc:id="c9be051b-8b57-4b18-8e2c-b7a5fa2dbe16" name="env" value="dev" />
+	<configuration-properties doc:name="Configuration properties" doc:id="226dcf35-4af8-42fb-87b1-117ccb67b735" file="${env}.properties" />
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="8bc7c03f-5091-4a44-9930-c54dcc3e3b93" >
+		<http:listener-connection host="${http.host}" port="${http.port}" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="9e6bb2be-7999-4198-92d7-f9cf2ebc6cac" basePath="${http.path.united}">
+		<http:request-connection host="${http.host.united}" protocol="HTTPS" port="${http.port.united}"/>
+	</http:request-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="1efd9f73-9144-413c-b8a3-c80a67dd8de4" >
+		<db:my-sql-connection host="${db.host}" port="${db.port}" user="${db.user}" password="${db.password}" database="${db.dbname}" />
+	</db:config>
+	<error-handler name="configError_Handler" doc:id="e9d4d605-2cd4-4241-8c9d-2788bb510798" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="4b784174-1eae-4373-a8a9-883f41bebd4f" >
+			<set-payload value="#['The application/data is currently not available']" doc:name="Set Payload" doc:id="b955bc63-52b7-4a77-ac1d-f1d4b99fed8c" />
+		</on-error-continue>
+	</error-handler>
+</mule>

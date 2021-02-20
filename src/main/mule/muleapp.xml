@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+
+	<flow name="getFlightsForm" doc:id="2056e22e-efde-4579-b5d2-5d5664273559" >
+		<http:listener doc:name="Listener" doc:id="5446e1a2-73a0-4536-8551-4d3441af5e92" config-ref="HTTP_Listener_config" path="/flights" allowedMethods="GET"/>
+		<parse-template doc:name="Flight Form" doc:id="0441347e-34fb-4468-8ff7-d1271fe75263" location="FlightFinder.html"/>
+		<error-handler ref="configError_Handler" />
+	</flow>
+	<flow name="postFlightsFromForm" doc:id="644d663e-defe-45e3-ba13-c2665e141e2a" >
+		<http:listener doc:name="Listener" doc:id="bf517ec2-833f-459e-9b0a-0c721126afe9" config-ref="HTTP_Listener_config" path="/flights" allowedMethods="POST"/>
+		<flow-ref doc:name="getFlights" doc:id="75d318f5-765f-4d38-84a6-4066091b8150" name="getFlights"/>
+		<error-handler ref="configError_Handler" />
+	</flow>
+	<flow name="getFlights" doc:id="87bbabb5-91f8-48e2-82f4-92f1905562c6" >
+		<choice doc:name="Choice" doc:id="b40ba881-85cc-4b86-ab92-0c6e30cbd079" >
+			<when expression='#[payload.airline == "american"]'>
+				<flow-ref doc:name="getAmericanFlights" doc:id="5dfee493-c9d5-4f96-b605-8b79ac16ea6c" name="getAmericanFlights"/>
+			</when>
+			<when expression='#[payload.airline == "united"]'>
+				<flow-ref doc:name="getUnitedFlights" doc:id="f4e7b35a-5a2d-4a47-8b86-4ca46382639a" name="getUnitedFlights"/>
+			</when>
+			<when expression='#[payload.airline == "all"]'>
+				<flow-ref doc:name="getAllFlight" doc:id="2750a69c-b6c3-4a74-8ec2-5660a533e264" name="getAllFlight"/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="fc6b287a-2be3-4ae5-a162-df95bbabfa27" message="#[payload]"/>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Set Order" doc:id="bbcaf871-567c-485f-8062-d20cdff8b6a2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload orderBy (flight) -> flight.price]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="be235b7c-305b-4b93-bed7-16cd5872a199" message="#[payload]"/>
+	</flow>
+	<flow name="getAllFlight" doc:id="573f7ee6-30a2-4ec2-b9a1-21a54ce86ad5" >
+		<scatter-gather doc:name="Scatter-Gather" doc:id="a194fc8f-7199-4e0e-b7dd-6532dbd094a8" >
+			<route >
+				<flow-ref doc:name="getAmericanFlights" doc:id="819ed083-98b5-42d4-b053-bab2cfa5b283" name="getAmericanFlights"/>
+			</route>
+			<route >
+				<flow-ref doc:name="getUnitedFlights" doc:id="b4a8d27e-b4a7-4be0-9111-683b45ebef3e" name="getUnitedFlights"/>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Combine" doc:id="86123146-79e9-4013-86b0-26b4151f2c29" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+flatten (payload..*payload)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getAmericanFlights" doc:id="4cb839dd-8e94-42d4-b5fc-163cd3ce0907" >
+		<http:listener doc:name="Listener" doc:id="9bbc8ae5-440a-4e2e-9c17-36a54dcc44fd" config-ref="HTTP_Listener_config" path="/american"/>
+		<set-variable value='#[%dw 2.0
+output application/json
+---
+if (!isEmpty(attributes.queryParams.code)) 
+	attributes.queryParams.code 
+else 
+if (!isEmpty(payload.destination))
+	payload.destination
+else
+	"SFO"]' doc:name="Set Destination" doc:id="bd8b8361-faf6-440e-aeb3-cb21414cf783" variableName="destination"/>
+		<db:select doc:name="Get American Flights" doc:id="ec7250b7-4188-4ea3-a590-de0292094200" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT * FROM american
+where toairport = :destination]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{'destination' : vars.destination}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform to Flight" doc:id="aa2a2a3f-49c7-4778-b75f-b2d0d707dc16" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map {
+	airlineName: $.airlinename,
+	emptySeats: 
+		if ($.seatsavailable=="none")
+			0
+		else 
+			$.seatsavailable as Number,
+	departureDate: $.takeoffdate 
+		as String {format: "yyyy/MM/dd"},
+	destination: $.toairport,
+	code: 
+		if (!isEmpty($.code1) and !isEmpty($.code2))
+			$.code1 ++ $.code2
+		else
+			"",
+	origin: $.fromairport,
+	planeType: $.planetype,
+	price: $.price 
+		as Number {format: "###.##"}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="0bb1a7db-2109-483e-aed2-835b625ccc40" message="#[payload]"/>
+		<error-handler ref="configError_Handler" />
+	</flow>
+	<flow name="getUnitedFlights" doc:id="a0f49ec8-eca2-496f-aeb2-ff45f6a71088" >
+		<http:listener doc:name="Listener" doc:id="f2fd6e22-d147-4ebf-aae3-8a60e786d0b9" config-ref="HTTP_Listener_config" path="/united"/>
+		<set-variable value='#[%dw 2.0
+output application/json
+---
+if (!isEmpty(attributes.queryParams.code)) 
+	attributes.queryParams.code 
+else 
+if (!isEmpty(payload.destination))
+	payload.destination
+else
+	"SFO"]' doc:name="Set Destination" doc:id="bbd86d28-38dc-4a5a-a05e-5e0f3c441b65" variableName="destination"/>
+		<http:request method="GET" doc:name="Get United Flights" doc:id="938e447d-eeea-4f2f-860e-5f843fa2a5e5" config-ref="HTTP_Request_configuration" path="/">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	destination : vars.destination
+}]]]></http:query-params>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="780ff3fe-ed2d-41db-957f-551a0ec81d47" message="#[payload]"/>
+		<error-handler ref="configError_Handler" />
+	</flow>
+</mule>

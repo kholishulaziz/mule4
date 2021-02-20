@@ -1,0 +1,49 @@
+#%RAML 0.8
+title: MUA Flights API
+version: 1.0
+baseUri: http://localhost:8081/api/{version}
+/flights:
+  /{destination}:
+    get:
+      queryParameters:
+        airline:
+          default: all
+          enum: [all, united, delta, american]
+      responses:
+        200:
+          body:
+            application/json:
+              example: |
+                {"flights": [
+                  {
+                      "airlineName": "United",
+                      "price": 400,
+                      "departureDate": "2015/03/20",
+                      "planeType": "Boeing 737",
+                      "origin": "MUA",
+                      "code": "ER38sd",
+                      "emptySeats": 0,
+                      "destination": "SFO"
+                    },
+                    {
+                      "airlineName": "United",
+                      "price": 345.99,
+                      "departureDate": "2015/02/11",
+                      "planeType": "Boeing 737",
+                      "origin": "MUA",
+                      "code": "ER45if",
+                      "emptySeats": 52,
+                      "destination": "LAX"
+                    },
+                    {
+                      "airlineName": "United",
+                      "price": 346,
+                      "departureDate": "2015/04/11",
+                      "planeType": "Boeing 777",
+                      "origin": "MUA",
+                      "code": "ER45jd",
+                      "emptySeats": 12,
+                      "destination": "LAX"
+                    }
+                    ]
+                  }
