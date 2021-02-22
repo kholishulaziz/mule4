@@ -1,6 +1,11 @@
 pipeline {
   agent any
   stages {
+    stage('Unit Test') {
+      steps {
+        bat 'mvn clean package -nsu -DskipMunitTests'
+      }
+    }
     stage('Deploy CloudHub') {
       environment {
         ANYPOINT_CREDENTIALS = credentials('anypoint.credentials')
