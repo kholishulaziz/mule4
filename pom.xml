@@ -47,7 +47,8 @@
                     <cloudHubDeployment>
 				      <uri>https://anypoint.mulesoft.com</uri>
 				      <muleVersion>${cloudhub.runtime.version}</muleVersion>
-				      <server>my.anypoint.credentials</server>
+				      <username>${anypoint.username}</username> 
+            		  <password>${anypoint.password}</password>
 				      <applicationName>aziz-mule4</applicationName>
 				      <environment>Sandbox</environment>
 				    </cloudHubDeployment>
