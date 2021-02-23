@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.mycompany</groupId>
+	<groupId>com.aziz</groupId>
 	<artifactId>muleapp</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>mule-application</packaging>
@@ -21,8 +21,14 @@
 		<mule.apikit.version>1.3.16</mule.apikit.version>
 		<munit.version>2.3.1</munit.version>		
 		<mysql.version>8.0.20</mysql.version>
+		<munit.version>2.3.1</munit.version>
+		
 		<cloudhub.runtime.version>4.3.0</cloudhub.runtime.version>
-	<munit.version>2.3.1</munit.version>
+		<cloudhub.app.name>aziz-mule4</cloudhub.app.name>
+		<cloudhub.worker>1</cloudhub.worker>
+		<cloudhub.worker.type>MICRO</cloudhub.worker.type>
+		<cloudhub.objectStoreV2>true</cloudhub.objectStoreV2>
+		<cloudhub.environment>Sandbox</cloudhub.environment>		
     </properties>
 
 	<build>
@@ -49,12 +55,15 @@
 				      <muleVersion>${cloudhub.runtime.version}</muleVersion>
 				      <username>${anypoint.username}</username> 
             		  <password>${anypoint.password}</password>
-				      <applicationName>aziz-mule4</applicationName>
-				      <environment>Sandbox</environment>
+				      <applicationName>${cloudhub.app.name}</applicationName>
+				      <workers>${cloudhub.worker}</workers>
+      				  <workerType>${cloudhub.worker.type}</workerType>
+      				  <objectStoreV2>${cloudhub.objectStoreV2}</objectStoreV2>
+				      <environment>${cloudhub.environment}</environment>
 				    </cloudHubDeployment>
                 </configuration>
 			</plugin>
-		<plugin>
+			<plugin>
                 <groupId>com.mulesoft.munit.tools</groupId>
                 <artifactId>munit-maven-plugin</artifactId>
                 <version>${munit.version}</version>

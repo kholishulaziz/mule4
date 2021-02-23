@@ -1,7 +1,7 @@
 pipeline {
   agent any
   stages {
-    stage('Unit Test') {
+    stage('Package') {
       steps {
         bat 'mvn clean package -nsu -DskipMunitTests'
       }
